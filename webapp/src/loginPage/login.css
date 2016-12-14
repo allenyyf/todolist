@@ -1,0 +1,154 @@
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+hr,
+p,
+blockquote,
+dl,
+dt,
+dd,
+ul,
+ol,
+li,
+pre,
+form,
+fieldset,
+legend,
+button,
+input,
+textarea,
+th,
+td {
+  margin: 0;
+  padding: 0;
+}
+body,
+button,
+input,
+select,
+textarea {
+  font: 12px/1.5tahoma, arial;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: 100%;
+}
+address,
+cite,
+dfn,
+em,
+var {
+  font-style: normal;
+}
+code,
+kbd,
+pre,
+samp {
+  font-family: couriernew, courier, monospace;
+}
+small {
+  font-size: 12px;
+}
+ul,
+ol {
+  list-style: none;
+}
+a {
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+sup {
+  vertical-align: text-top;
+}
+sub {
+  vertical-align: text-bottom;
+}
+legend {
+  color: #000;
+}
+fieldset,
+img {
+  border: 0;
+}
+button,
+input,
+select,
+textarea {
+  font-size: 100%;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+.container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 500px;
+  height: 350px;
+  text-align: center;
+  background: #eee;
+  transform: translateX(-250px) translateY(-150px);
+  border-radius: 10px;
+}
+.container .login-Tab,
+.container .signup-Tab {
+  width: 50px;
+  height: 30px;
+  display: inline-block;
+  text-align: center;
+  line-height: 30px;
+  font-size: 20px;
+  margin: 20px;
+}
+.container .form-container {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  width: 300px;
+  height: 150px;
+  transform: translateX(-150px) translateY(-75px);
+  text-align: center;
+}
+.container .form-container input {
+  width: 230px;
+  height: 40px;
+  margin: 5px;
+  outline: none;
+  border: 1px solid #ccc;
+  text-indent: 10px;
+}
+.container .form-container div.signupBtn,
+.container .form-container div.loginBtn {
+  text-align: center;
+  width: 230px;
+  height: 30px;
+  line-height: 30px;
+  background: #ccc;
+  display: inline-block;
+  border-radius: 5px;
+  margin-top: 3px;
+}
+.container .form-container span {
+  color: red;
+  font-size: 13px;
+  width: 230px;
+  height: 13px;
+  display: block;
+  text-align: left;
+  text-indent: 40px;
+}
+.clicked {
+  color: #55abed;
+  border-bottom: 2px solid #55abed;
+}
