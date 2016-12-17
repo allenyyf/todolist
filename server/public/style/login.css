@@ -148,7 +148,26 @@ table {
   text-align: left;
   text-indent: 40px;
 }
+.container .form-container div.error-btn {
+  width: 230px;
+  height: 60px;
+  display: inline-block;
+  position: relative;
+  color: red;
+  background: #ccc;
+  top: -30px;
+  left: 35px;
+  line-height: 30px;
+  text-align: center;
+  display: none;
+}
+.container .form-container div.error-btn p {
+  display: inline-block;
+}
 .clicked {
   color: #55abed;
   border-bottom: 2px solid #55abed;
+}
+.show {
+  display: block!important;
 }

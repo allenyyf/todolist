@@ -1,6 +1,7 @@
 var Item = (function () {
     function Item() {
         this.status = "todo";
+        this.transformed = false;
         this.template = "<div class=\"item\"><span class=\"left\"><i class=\"iconfont icon-duigou hide\"></i></span>\n        <input type=\"text\" class=\"content\" value=\"\">\n        <span class=\"right\"><i class=\"iconfont icon-cha\"></i></span></div>";
         this.render();
     }
@@ -18,6 +19,7 @@ var Item = (function () {
         });
         this.iconCha.addEventListener("click", function () {
             _this.todolist.removeItem(_this);
+            // this.todolist.removeDbItem(this)
         });
         this.inputBox.addEventListener("keydown", function (e) {
             var keyUp = 38;
@@ -126,27 +128,67 @@ var TodoList = (function () {
         }
         this.setCurrentTab();
         this.setItemLeftNum();
-        this.setLocalStorageDate();
-        this.setDbData();
     };
-    TodoList.prototype.setDbData = function () {
+    TodoList.prototype.transformItemData = function () {
         var xmlhttp = new XMLHttpRequest();
-        var data = new FormData();
-        var itemsValue = [];
-        var itemsStatus = [];
+        var items = [];
+        var itemData = {};
+        var tabNumber = this.tabs.indexOf(this.currentTab);
         this.items.forEach(function (item) {
-            itemsValue.push(item.inputBox.value);
-            itemsStatus.push(item.status);
+            itemData = {
+                value: item.inputBox.value,
+                status: item.status
+            };
+            items.push(itemData);
         });
-        var itemsValueString = JSON.stringify(itemsValue);
-        var itemsStatusString = JSON.stringify(itemsStatus);
-        data.append("itemsValue", itemsValueString);
-        data.append("itemsStatus", itemsValueString);
-        xmlhttp.open("post", "http://127.0.0.1:8080");
-        xmlhttp.send(data);
-        console.log(data);
+        var itemsData = {
+            _id: "123456",
+            data: items,
+            tabNum: tabNumber
+        };
+        //     let itemsDataJson = JSON.stringify(itemsData)
+        //     xmlhttp.open("POST","data")
+        //     xmlhttp.setRequestHeader("content-type","application/json")
+        //     xmlhttp.send(itemsDataJson)
+        // }
     };
+    //     let itemsDataJson = JSON.stringify(itemsData)
+    //     xmlhttp.open("POST","data")
+    //     xmlhttp.setRequestHeader("content-type","application/json")
+    //     xmlhttp.send(itemsDataJson)
+    // }
     TodoList.prototype.fromDbDate = function () {
+        var _this = this;
+        console.log("get server data");
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.open("GET", "data");
+        xmlhttp.send();
+        xmlhttp.onreadystatechange = function () {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                var itemsData = JSON.parse(xmlhttp.responseText)[0];
+                if (itemsData) {
+                    _this.setTodoListData(itemsData);
+                }
+            }
+        };
+    };
+    TodoList.prototype.setTodoListData = function (itemsData) {
+        for (var i = 0; i < itemsData.data.length; i++) {
+            var item = new Item();
+            item.setContent(itemsData.data[i].value);
+            item.status = itemsData.data[i].status;
+            item.render();
+            item.todolist = this;
+            this.items.push(item);
+        }
+        this.currentTab = this.tabs[itemsData.tabNum];
+        if (this.tabs[itemsData.tabNum] == this.tabActive) {
+            this.onClickTabActive();
+        }
+        else if (this.tabs[itemsData.tabNum] == this.tabCompleted) {
+            this.onClickTabCompleted();
+        }
+        this.render();
     };
     TodoList.prototype.createItemByInput = function () {
         var item = new Item();
@@ -232,50 +274,100 @@ var TodoList = (function () {
         });
         this.labelItemLeft.innerHTML = itemleftNum + " itemleft";
     };
-    TodoList.prototype.setLocalStorageDate = function () {
-        var itemsValue = [];
-        var itemsStatus = [];
-        this.items.forEach(function (item) {
-            itemsValue.push(item.inputBox.value);
-            itemsStatus.push(item.status);
-        });
-        var itemsValueString = JSON.stringify(itemsValue);
-        var itemsStatusString = JSON.stringify(itemsStatus);
-        localStorage.setItem("itemsValue", itemsValueString);
-        localStorage.setItem("itemsStatus", itemsStatusString);
-        localStorage.setItem("selectedTab", this.currentTab.className);
-    };
-    TodoList.prototype.fromStorage = function () {
-        var itemsValue = JSON.parse(localStorage.getItem("itemsValue"));
-        var itemsStatus = JSON.parse(localStorage.getItem("itemsStatus"));
-        var selectedTabClassName = "." + localStorage.getItem("selectedTab");
-        var selectedTab = document.querySelector(selectedTabClassName);
-        if (localStorage.getItem("itemsValue")) {
-            this.setTodoList(itemsValue, itemsStatus, selectedTab);
-        }
-    };
-    TodoList.prototype.setTodoList = function (itemsValue, itemsStatus, selectedTab) {
-        for (var i = 0; i < itemsValue.length; i++) {
-            var item = new Item();
-            item.setContent(itemsValue[i]);
-            item.status = itemsStatus[i];
-            item.render();
-            item.todolist = this;
-            this.items.push(item);
-        }
-        this.currentTab = selectedTab;
-        if (selectedTab == this.tabActive) {
-            this.onClickTabActive();
-        }
-        else if (selectedTab == this.tabCompleted) {
-            this.onClickTabCompleted();
-        }
-        this.render();
+    TodoList.prototype.sendDataToDB = function () {
+        var _this = this;
+        setInterval(function () {
+            _this.transformItemData();
+            console.log("update db");
+        }, 60000);
     };
     return TodoList;
 }());
 window.onload = function () {
     var todolist = new TodoList();
-    todolist.fromStorage();
+    todolist.fromDbDate();
+    todolist.sendDataToDB();
 };
+// public setLocalStorageDate(){
+//     let itemsValue:any[] = []
+//     let itemsStatus:any[] = []
+//     this.items.forEach((item)=>{
+//         itemsValue.push(item.inputBox.value)
+//         itemsStatus.push(item.status)
+//     })
+//     let itemsValueString = JSON.stringify(itemsValue)
+//     let itemsStatusString = JSON.stringify(itemsStatus)
+//     let tabNumber = this.tabs.indexOf(this.currentTab)
+//     localStorage.setItem("itemsValue",itemsValueString)
+//     localStorage.setItem("itemsStatus",itemsStatusString)
+//     localStorage.setItem("tabNumber",tabNumber.toString())
+// }
+// public fromStorage(){
+//     let itemsValue = JSON.parse(localStorage.getItem("itemsValue"))
+//     let itemsStatus = JSON.parse(localStorage.getItem("itemsStatus"))
+//     let tabNumber = parseInt(localStorage.getItem("tabNumber"))
+//     let selectedTab = this.tabs[tabNumber]
+//     if(localStorage.getItem("itemsValue")){
+//         this.setTodoList(itemsValue,itemsStatus,selectedTab)
+//     }
+// }
+//     public setTodoList(itemsValue:any[],itemsStatus:any[],selectedTab:HTMLElement){
+//     for(let i=0;i<itemsValue.length;i++){
+//         let item = new Item()
+//         item.setContent(itemsValue[i])
+//         item.status = itemsStatus[i]
+//         item.render()
+//         item.todolist = this
+//         this.items.push(item)
+//     }
+//     this.currentTab = selectedTab
+//     if(selectedTab == this.tabActive){
+//         this.onClickTabActive()
+//     }else if(selectedTab == this.tabCompleted){
+//         this.onClickTabCompleted()
+//     }
+//     this.render()
+// }
+// public transformItemData(){
+//     let xmlhttp = new XMLHttpRequest()
+//     let itemsData:any[]= []
+//     let itemData = {}
+//     this.items.forEach((item)=>{            
+//         if(item._id){
+//             itemData = {
+//                 "value":item.inputBox.value,
+//                 "status":item.status,
+//                 "_id":"itemDatas"
+//             }
+//         }else{
+//             if(!item.transformed){
+//                 itemData = {
+//                 "value":item.inputBox.value,
+//                 "status":item.status
+//                 }
+//             }
+//         }
+//         item.transformed = true
+//         itemsData.push(itemData)
+//     })
+//     let itemsDataString = JSON.stringify(itemsData)
+//     xmlhttp.open("POST","data")
+//     xmlhttp.setRequestHeader("content-type","application/json")
+//     xmlhttp.send(itemsDataString)
+//     console.log(itemsDataString)
+// }
+// public transformTabData(){
+//     let xmlhttp = new XMLHttpRequest()
+//     let tabNumber = this.tabs.indexOf(this.currentTab)
+//     xmlhttp.open("POST","tabData")
+//     xmlhttp.send(tabNumber)
+// }
+// public removeDbItem(item:Item){
+//     let itemId = {removeItemId:item._id}
+//     let removeItemId = JSON.stringify(itemId)
+//     let xmlhttp = new XMLHttpRequest()
+//     xmlhttp.open("POST","removeData")
+//     xmlhttp.setRequestHeader("content-type","application/json")
+//     xmlhttp.send(removeItemId)
+// } 
 //# sourceMappingURL=main.js.map

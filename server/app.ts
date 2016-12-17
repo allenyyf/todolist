@@ -1,4 +1,3 @@
-
 /// <reference path="typings/index.d.ts" />
 
 import * as express from "express"
@@ -27,44 +26,59 @@ app.get("/data",function(req,res,doc){
     })
 })
 
-app.post("/login",(req,res,callback)=>{
+app.post("/login",(req,res)=>{
     let loginData = req.body
     console.log(req.body)
     let account = loginData.account
     let password = loginData.password
-    findUserData(database,account,password,()=>{
-        // res.sendFile("html/content.html",{root:"/"})
-        res.setHeader('Cache-Control', 'no-cache')
-        // res.redirect("/html/content.html")
-        res.send("http://127.0.0.1:8080/html/content.html")
-    })
+    let hash = crypto.createHash("sha256")
+    hash.update(password)
+    let passwordHash = hash.digest("hex")
+    findUserData(database,account,(doc:any)=>{
+        if(doc.password == passwordHash){
+            res.send("password is right")
+        }else{
+            res.send("password is wrong")
+        }
+    },password)
 })
 
 
 app.post("/signup",(req,res)=>{
     let signupData = req.body
-    console.log(req.body)
     let account = signupData.account
     let password = signupData.password
-    findUserData(database,account,password,(doc)=>{
-        if(doc){
-            res.send("账户已存在")
-        }else{
-            let hash = crypto.createHash("sha256")
-            hash.update(password)
-            console.log(password)
-            let savePw = hash.digest("hex")
-            console.log(savePw)
-            let signupData = {
-                "account":account,
-                "password":savePw
-            }
-            insertSignupData(database,signupData)
-        }    
+    let hash = crypto.createHash("sha256")
+    hash.update(password)
+    let passwordHash = hash.digest("hex")
+    let signupDataToDb = {
+        account:account,
+        password:passwordHash
+    }
+    findUserData(database,account,(doc:any)=>{
+        let signupData = signupDataToDb
+        if(!doc){
+            createAccountIndex(database,account,()=>{
+                insertSignupData(database,signupData,()=>{
+                    res.send("您的注册已成功")
+                })
+            })   
+        }
     })
 })
 
 
+app.post("/signupAccount",(req,res)=>{
+    let signupData = req.body
+    let account = signupData.account
+    findUserData(database,account,(doc)=>{
+        if(doc){
+            res.send("账户已存在")
+        }else{
+            res.send("账户名未注册")
+        }
+    })
+})
 
 
 app.listen(8080,()=>{
@@ -95,26 +109,42 @@ function updateDb(database:mongodb.Db,itemsData:any){
 function findDocument(database:mongodb.Db,callback:(doc:any)=>any){
     let collection = database.collection("todolist")
     collection.find({}).toArray((err,doc)=>{
-        assert.equal(null,err);
         console.log(doc);
         callback(doc)
     })
 }
 
-function insertSignupData(database:mongodb.Db,signupData:any){
+function insertSignupData(database:mongodb.Db,signupData:any,callback?:()=>any){
     let collection = database.collection("userdata")
     collection.insert(signupData,(err,doc)=>{
         console.log(doc)
     })
+    callback()
 }
 
-function findUserData(database:mongodb.Db,account:any,password:any,callback:(doc:any)=>any){
+function findUserData(database:mongodb.Db,account:any,callback:(doc:any)=>any,password?:any){
     let collection = database.collection("userdata")
     collection.findOne({account},(err,doc)=>{
-        assert.equal(null,err);
         console.log(doc);
         callback(doc)
     })
+}
+
+function createAccountIndex(database:mongodb.Db,account:any,callback:()=>any){
+    console.log("createIndex")
+    let collection = database.collection("userdata")
+    let option = {
+        unique:true
+    }
+    collection.createIndex({user:1},option,(err,indexName)=>{
+        console.log(indexName)
+        console.log(err)
+    })
+
+    collection.indexExists(["user_1","_id_"],function(err,result){
+        console.log(result)
+    })
+    callback()
 }
 
 

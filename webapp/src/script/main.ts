@@ -162,11 +162,11 @@ class TodoList{
             tabNum:tabNumber
         }
 
-        let itemsDataJson = JSON.stringify(itemsData)
-        xmlhttp.open("POST","data")
-        xmlhttp.setRequestHeader("content-type","application/json")
-        xmlhttp.send(itemsDataJson)
-    }
+    //     let itemsDataJson = JSON.stringify(itemsData)
+    //     xmlhttp.open("POST","data")
+    //     xmlhttp.setRequestHeader("content-type","application/json")
+    //     xmlhttp.send(itemsDataJson)
+    // }
 
 
 

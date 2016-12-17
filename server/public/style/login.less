@@ -54,11 +54,6 @@
             text-indent: 10px;
           }
 
-          // input.signup,input.login{
-          //     text-indent:0px;
-          //     background-color:#ccc;
-          //     border-radius: 5px;
-          // }
           div.signupBtn,div.loginBtn{
             text-align: center;
             width: 230px;
@@ -78,10 +73,30 @@
             text-align: left;
             text-indent: 40px;
           }
+          div.error-btn{
+            width: 230px;
+            height: 60px;
+            display: inline-block;
+            position: relative;
+            color: red;
+            background: #ccc;
+            top: -30px;
+            left:35px;
+            line-height: 30px;
+            text-align: center;
+            display: none;
+            p{
+              display: inline-block;
+            }
+          }
       }
   }
 
   .clicked{
     color:@blue-color;
     border-bottom:2px solid @blue-color;
+  }
+
+  .show{
+    display: block!important;
   }
